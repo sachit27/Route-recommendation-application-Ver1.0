@@ -6,9 +6,9 @@ var polilynes = [];
 /**
  * This are parametrical values that you can change for your bussiness.
  */
-var closerMargin = { value: 10, color:"RED"};
-var mediumMargin = { value: 48, color:"YELLOW"};
-var higherMargin = { value: 50, color:"GREEN"};
+var closerMargin = { value: 10, color:"GREEN"};
+var mediumMargin = { value: 40, color:"YELLOW"};
+var higherMargin = { value: 65, color:"RED"};
 var lineWeight = 11; //Route line weight
 
 /**
@@ -69,7 +69,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, from, to
 
 function calculateAverageAndSetColorRoutes(result) {
 	cleanPolylinesAndAirAverages();
-	var table = "<table style='width: 100%''><colgroup><col span='1' style='width: 50%;'><col span='1' style='width: 50%;'></colgroup><tr><th>Route</th><th>Average Quality Air</th>"; //This line makes the HTML table for the routes and averages
+	var table = "<table style='width: 100%''><colgroup><col span='1' style='width: 50%;'><col span='1' style='width: 50%;'></colgroup><tr><th>Route</th><th>PM2.5</th>"; //This line makes the HTML table for the routes and averages
 	for(var routePos = 0; routePos<result.routes.length; routePos++){ //Calculate average and paint route for each route
 		var currentRouteArray = result.routes[routePos];
 		var currentRoute = currentRouteArray.overview_path;
