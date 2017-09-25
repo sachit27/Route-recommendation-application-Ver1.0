@@ -7,7 +7,7 @@ var polilynes = [];
  * This are parametrical values that you can change for your bussiness.
  */
 var closerMargin = { value: 10, color:"YELLOW"};
-var mediumMargin = { value: 40, color:"BROWN"};
+var mediumMargin = { value: 40, color:"GREEN"};
 var higherMargin = { value: 65, color:"RED"};
 var lineWeight = 11; //Route line weight
 
