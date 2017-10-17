@@ -1,8 +1,8 @@
 /**
 * This are parametrical values that you can change for your bussiness.
 */
-var closerMargin = { value: 10, color:"PINK"};
-var mediumMargin = { value: 30, color:"YELLOW"};
+var closerMargin = { value: 10, color:"YELLOW"};
+var mediumMargin = { value: 30, color:"RED"};
 var higherMargin = { value: 50, color:"BROWN"};
 var lineWeight = 11; //Route line weight
 var timerToRefreshRoutes = 1000 * 60 * 6; // 6 minutes for refreshing average and color of routes in the map
