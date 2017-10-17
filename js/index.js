@@ -1,5 +1,5 @@
 /**
-* This are parametrical values that you can change for your bussiness.
+* These are parametrical values
 */
 var closerMargin = { value: 10, color:"YELLOW"};
 var mediumMargin = { value: 30, color:"RED"};
