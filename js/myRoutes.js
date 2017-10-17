@@ -142,7 +142,7 @@ function paintMyBestRoute(arrCoord, color, map){
     geodesic: true,
     strokeColor: color,
     strokeOpacity: 1.0,
-    strokeWeight: 2
+    strokeWeight: 4
   });
 
   bestAirApiPath.setMap(map);
