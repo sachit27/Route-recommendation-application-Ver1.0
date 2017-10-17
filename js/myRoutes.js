@@ -1,6 +1,6 @@
 //These are parametric configuration for best route algorithm. You can see the image attached in fiverr conversation for better understanding of these
 var distance_between_coordinates = 0.1; //The smaller the distance, the greater the presicion but the longer the waiting time
-var margin_for_matrix_between_two_points= 5; //The larger the distance, the greater the route options but the longer the waiting time
+var margin_for_matrix_between_two_points= 1; //The larger the distance, the greater the route options but the longer the waiting time
 var margin_for_each_side = margin_for_matrix_between_two_points/2 //This is the same margin for each side of points A and B.
 var colorOfBestRoute = "#C71585";
 
