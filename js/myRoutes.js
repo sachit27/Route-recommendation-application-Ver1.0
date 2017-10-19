@@ -1,7 +1,7 @@
 //These are parametric configuration for best route algorithm. 
 //The smaller the distance, the greater the presicion but the longer the waiting time
 const distance_between_coordinates_far = 0.05; //Constant for distance between two adyacent points for long routes
-const distance_between_coordinates_close = 0.005; //Constant for distance between two adyacent points for short routes
+const distance_between_coordinates_close = 0.009; //Constant for distance between two adyacent points for short routes
 var margin_for_matrix_between_two_points= 0.1; //The larger the distance, the greater the route options but the longer the waiting time
 var margin_for_each_side = margin_for_matrix_between_two_points/2 //This is the same margin for each side of points A and B.
 
