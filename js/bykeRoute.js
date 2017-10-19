@@ -1,4 +1,4 @@
-var keyGraphopper = "233693a8-be91-4ca0-b2ed-0a489e74f038"; //CHANGE GRAPHOOPPER API KEY. This is one of my own for testing
+var keyGraphopper = "0807af3f-7c7b-440e-9ebd-85e4300816d6"; //CHANGE GRAPHOOPPER API KEY. This is one of my own for testing
 var bykeElementsData;
 var adFrom, adTo;
 /**
