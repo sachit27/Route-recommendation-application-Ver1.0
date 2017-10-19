@@ -154,7 +154,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, from, to
 }
 
 function calculateAverageAndSetColorRoutes(result) {
-	var table = "<table id='routes_table' style='width: 100%''><colgroup><col span='1' style='width: 50%;'><col span='1' style='width: 50%;'></colgroup><tr><th>Route</th><th>Average Quality Air</th>"; //This line makes the HTML table for the routes and averages
+	var table = "<table id='routes_table' style='width: 100%''><colgroup><col span='1' style='width: 50%;'><col span='1' style='width: 50%;'></colgroup><tr><th>Route</th><th>PM2.5</th>"; //This line makes the HTML table for the routes and averages
 	codeAddress(result,selectedMode);
 	for(var routePos = 0; routePos<result.routes.length; routePos++){ //Calculate average and paint route for each route
 		var currentRouteArray = result.routes[routePos];
