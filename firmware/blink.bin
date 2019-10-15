@@ -1,37 +1,200 @@
-/*
-  Blink
+/**
+ * httpUpdate.ino
+ *
+ *  Created on: 27.11.2015
+ *
+ */
+#include <Arduino.h>
+#include <Wire.h>
+#include "Adafruit_SHT31.h"
 
-  Turns an LED on for one second, then off for one second, repeatedly.
+#include <SoftwareSerial.h> // using SoftwareSerial might create problems in activating sleep mode, see additional Serial.flush(); below
+#include "PMS.h"
 
-  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-  the correct LED pin independent of which board is used.
-  If you want to know what pin the on-board LED is connected to on your Arduino
-  model, check the Technical Specs of your board at:
-  https://www.arduino.cc/en/Main/Products
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
 
-  modified 8 May 2014
-  by Scott Fitzgerald
-  modified 2 Sep 2016
-  by Arturo Guadalupi
-  modified 8 Sep 2016
-  by Colby Newman
+#include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
 
-  This example code is in the public domain.
+//===========LIBRARIES===========
+//WiFi Manager related
+#include <DNSServer.h>
+//#include <ESP8266WebServer.h>
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
 
-  http://www.arduino.cc/en/Tutorial/Blink
-*/
+//for LED status
+#include <Ticker.h>
 
-// the setup function runs once when you press reset or power the board
-void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+//===========OBJECT===========
+WiFiClient  client;
+Ticker ticker;
+
+SoftwareSerial serialDust(0, 2); // RX, TX  works for Dustbox 2.0
+
+PMS pms(serialDust);
+PMS::DATA data;
+
+uint32_t delayMS;
+
+Adafruit_SHT31 sht31 = Adafruit_SHT31();
+
+//===========VARIABLES===========
+
+unsigned long myChannelNumber = 0;  // Replace the 0 with your channel number
+const char * myWriteAPIKey = "25I7G8Q4HXASY8C8";
+int ledPin = 14; 
+String datapacket;
+int readingInterval = 1;
+
+//===========FUNCTIONS===========
+
+void tick() {
+  //toggle state
+  int state = digitalRead(ledPin);  // get the current state of GPIO1 pin
+  digitalWrite(ledPin, !state);     // set pin to the opposite state
 }
 
-// the loop function runs over and over again forever
-void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);                       // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);                       // wait for a second
+//gets called when WiFiManager enters configuration mode
+void configModeCallback (WiFiManager *myWiFiManager) {
+  Serial.println("Entered config mode");
+  Serial.println(WiFi.softAPIP());
+  //if you used auto generated SSID, print it
+  Serial.println(myWiFiManager->getConfigPortalSSID());
+  //entered config mode, make led toggle faster
+  ticker.attach(0.2, tick);
+}
+
+void setup()
+{
+  // Serial Port setups
+  Serial.begin(115200);   // used for print output
+
+  while (!Serial)
+    delay(10);     // will pause Zero, Leonardo, etc until serial console opens
+
+  Serial.println("SHT31 test");
+  if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
+    Serial.println("Couldn't find SHT31");
+    while (1) delay(1);
+  }
+
+  serialDust.begin(9600); // software serial for dust sensor
+  pms.passiveMode();    // Switch to passive mode
+
+  //set pin outputs
+  pinMode(ledPin, OUTPUT);
+  // start ticker with 0.5 because we start in AP mode and try to connect
+  ticker.attach(0.6, tick);
+
+  //Network Manager
+  WiFiManager wifiManager;
+  //reset settings - for testing
+  //wifiManager.resetSettings();`
+  //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
+  wifiManager.setAPCallback(configModeCallback);
+
+  //tries to connect, if not setups up the APNetwork
+  if (!wifiManager.autoConnect("AirKit90", "password")) {
+    Serial.println("failed to connect and hit timeout");
+    //reset and try again, or maybe put it to deep sleep
+    ESP.reset();
+    delay(1000);
+  }
+
+  //if you get here you have connected to the WiFi
+  
+  
+  Serial.println("AIRKIT CONNECTED: RESULT");
+  ticker.detach();
+  analogWrite(ledPin, 255);
+  datapacket = "";
+  delay(5000);
+
+  t_httpUpdate_return ret = ESPhttpUpdate.update("https://sachit27.github.io/firmware/blink.bin", "", "70:0B:6F:62:4F:41:EB:1A:42:3F:73:5A:DA:96:98:2D:7F:2B:75:6F");
+    
+    Serial.println("*** Done updating!");
+
+
+}
+
+
+void loop()
+{
+  Serial.println("Waking up, wait 20 seconds for stable readings...");
+  pms.wakeUp();
+  analogWrite(ledPin, 50);
+  delay(19500);
+  Serial.println("Send read request...");
+  pms.requestRead();
+
+  if (pms.readUntil(data)) {
+    Serial.print("PM 1.0 (ug/m3): ");
+    Serial.println(data.PM_AE_UG_1_0);
+    //ThingSpeak.setField(1, data.PM_AE_UG_1_0);
+
+    Serial.print("PM 2.5 (ug/m3): ");
+    Serial.println(data.PM_AE_UG_2_5);
+    //ThingSpeak.setField(2, data.PM_AE_UG_2_5);
+
+    Serial.print("PM 10.0 (ug/m3): ");
+    Serial.println(data.PM_AE_UG_10_0);
+    //ThingSpeak.setField(3, data.PM_AE_UG_10_0);
+
+    Serial.println();
+  } else {
+    Serial.println("No data.");
+  }
+
+  //TEMPERATURE VALUES 
+  float t = sht31.readTemperature();
+  float h = sht31.readHumidity();
+  //GET TEMPERATURE
+
+  if (! isnan(t)) {  // check if 'is not a number'
+    Serial.print("Temp *C = "); Serial.println(t);
+    //ThingSpeak.setField(4, t);
+  } else { 
+    Serial.println("Failed to read temperature");
+  }
+  
+  //GET HUMIDITY
+  // Get humidity event and print its value.
+  if (! isnan(h)) {  // check if 'is not a number'
+    Serial.print("Hum. % = "); Serial.println(h);
+    //ThingSpeak.setField(5, h);
+  } else { 
+    Serial.println("Failed to read humidity");
+  }
+  
+   datapacket = "particles=" + String(data.PM_AE_UG_2_5) + "&temperature=" + String(t) + "&humidity=" + String(h);
+
+  if (client.connect("136.244.105.217", 4000)) { // REPLACE WITH YOUR SERVER ADDRESS
+ 
+    client.println("POST /input/bl4KIvZdwwenwKeX1hlADNrLzRw HTTP/1.1"); 
+    client.println("Host: 136.244.105.217"); // SERVER ADDRESS HERE TOO
+    client.println("DustBox-Private-Key: M5gRk5aMYDLt9PfCU5SZqtncS8T");
+    client.println("Connection: close");
+    client.println("Content-Type: application/x-www-form-urlencoded"); 
+    client.print("Content-Length: "); 
+    client.println(datapacket.length()); 
+    client.println(); 
+    client.print(datapacket);
+    Serial.println(datapacket); 
+  } 
+
+  if (client.connected()) { 
+    client.stop();  // DISCONNECT FROM THE SERVER
+  }
+
+  delay(500);
+
+  
+
+  Serial.println("Going to sleep for 40 seconds.");
+  Serial.flush(); // IMPORTANT when using software serial
+  pms.sleep();
+  analogWrite(ledPin, 0);
+  delay(40000);
+  
 }
