@@ -167,7 +167,7 @@ void loop()
     Serial.println("Failed to read humidity");
   }
   
-   datapacket = "particles=" + String(data.PM_AE_UG_2_5) + "&temperature=" + String(t) + "&humidity=" + String(h);
+   datapacket = "pm25=" + String(data.PM_AE_UG_2_5) + "&temp=" + String(t) + "&humidity=" + String(h);
 
   if (client.connect("136.244.105.217", 4000)) { // REPLACE WITH YOUR SERVER ADDRESS
  
@@ -195,6 +195,6 @@ void loop()
   Serial.flush(); // IMPORTANT when using software serial
   pms.sleep();
   analogWrite(ledPin, 0);
-  delay(60000);
+  delay(40000);
   
 }
