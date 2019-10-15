@@ -195,6 +195,6 @@ void loop()
   Serial.flush(); // IMPORTANT when using software serial
   pms.sleep();
   analogWrite(ledPin, 0);
-  delay(40000);
+  delay(60000);
   
 }
